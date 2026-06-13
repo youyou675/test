@@ -47,26 +47,21 @@ jobs:
   security-scan-demo:
     runs-on: ubuntu-latest
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
+      
       - name: 运行 MobSF 静态代码扫描
         uses: MobSF/mobsfscan@main
         with:
           args: '. --sarif --output results.sarif || true'
-
-      - name: 上传扫描报告
-        uses: actions/upload-artifact@v4
+      
+      # 👇 新增：上传报告到 GitHub Security 页面
+      - name: 上传 SARIF 到 GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+      
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-report
           path: results.sarif
-
-      - name: 输出扫描结果摘要
-        run: |
-          echo "🔍 安全扫描已完成，报告已保存"
-          if [ -f results.sarif ]; then
-            echo "✅ 报告文件已生成"
-          else
-            echo "⚠️ 未生成报告文件"
-          fi

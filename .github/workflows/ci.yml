@@ -1,17 +1,14 @@
 # .github/workflows/ci.yml
 name: CI Pipeline - Auto Test & Security Scan
 
-# 触发条件：当代码推送到 main 分支时自动运行
 on:
   push:
     branches: [ main, master ]
-  # 也可以手动触发
   workflow_dispatch:
 
-# 定义流水线中的任务
 jobs:
 
-  # ========== 任务1：环境检查（验证流水线能跑通） ==========
+  # ========== 任务1：环境检查 ==========
   check-environment:
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +25,7 @@ jobs:
       - name: 打印欢迎信息
         run: echo "🎉 CI 流水线已成功触发！"
 
-  # ========== 任务2：接口自动化测试（演示版） ==========
+  # ========== 任务2：接口自动化测试 ==========
   api-test-demo:
     runs-on: ubuntu-latest
     steps:
@@ -41,13 +38,12 @@ jobs:
           python-version: '3.11'
 
       - name: 安装依赖
-        run: |
-          pip install requests
+        run: pip install requests
 
       - name: 运行接口测试
         run: python test_api.py
 
-  # ========== 任务3：安全扫描（MobSF 轻量版） ==========
+  # ========== 任务3：安全扫描 ==========
   security-scan-demo:
     runs-on: ubuntu-latest
     steps:

@@ -1,0 +1,85 @@
+# .github/workflows/ci.yml
+name: CI Pipeline - Auto Test & Security Scan
+
+# 触发条件：当代码推送到 main 分支时自动运行
+on:
+  push:
+    branches: [ main, master ]
+  # 也可以手动触发
+  workflow_dispatch:
+
+# 定义流水线中的任务
+jobs:
+
+  # ========== 任务1：环境检查（验证流水线能跑通） ==========
+  check-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 显示仓库内容
+        run: |
+          echo "仓库内容列表："
+          ls -la
+          echo "当前时间："
+          date
+
+      - name: 打印欢迎信息
+        run: echo "🎉 CI 流水线已成功触发！"
+
+  # ========== 任务2：接口自动化测试（演示版） ==========
+  api-test-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装 requests 库
+        run: pip install requests
+
+      - name: 运行接口测试
+        run: |
+          python << 'EOF'
+          import requests
+          try:
+              resp = requests.get('https://httpbin.org/get', timeout=5)
+              assert resp.status_code == 200
+              print('✅ 接口测试通过！状态码:', resp.status_code)
+          except Exception as e:
+              print('❌ 接口测试失败:', e)
+              exit(1)
+          EOF
+
+  # ========== 任务3：安全扫描（MobSF 轻量版） ==========
+  security-scan-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 运行 MobSF 静态代码扫描
+        uses: MobSF/mobsfscan@main
+        with:
+          args: '. --sarif --output results.sarif || true'
+
+      - name: 上传扫描报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report
+          path: results.sarif
+
+      - name: 输出扫描结果摘要
+        run: |
+          echo "🔍 安全扫描已完成，报告已保存"
+          if [ -f results.sarif ]; then
+            echo "✅ 报告文件已生成"
+          else
+            echo "⚠️ 未生成报告文件"
+          fi

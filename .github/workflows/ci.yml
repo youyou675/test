@@ -40,21 +40,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: 安装 requests 库
-        run: pip install requests
+      - name: 安装依赖
+        run: |
+          pip install requests
 
       - name: 运行接口测试
-        run: |
-          python << 'EOF'
-          import requests
-          try:
-              resp = requests.get('https://httpbin.org/get', timeout=5)
-              assert resp.status_code == 200
-              print('✅ 接口测试通过！状态码:', resp.status_code)
-          except Exception as e:
-              print('❌ 接口测试失败:', e)
-              exit(1)
-          EOF
+        run: python test_api.py
 
   # ========== 任务3：安全扫描（MobSF 轻量版） ==========
   security-scan-demo:
